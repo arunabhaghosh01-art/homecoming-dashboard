@@ -86,7 +86,6 @@
   .card:nth-child(7) { animation-delay: 0.35s; }
   .card:nth-child(8) { animation-delay: 0.40s; }
   .card:nth-child(9) { animation-delay: 0.45s; }
-  .card:nth-child(10) { animation-delay: 0.50s; }
 
   @keyframes fadeInUp {
     to {
@@ -285,64 +284,6 @@
     line-height: 1.5;
   }
 
-  /* Photo Upload Section Styles */
-  .photo-upload-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
-  }
-
-  .custom-file-upload {
-    display: inline-block;
-    padding: 10px 16px;
-    cursor: pointer;
-    background: rgba(0, 255, 136, 0.15);
-    border: 1px solid #00ff88;
-    border-radius: 10px;
-    color: #00ff88;
-    font-weight: 700;
-    font-size: 13px;
-    text-align: center;
-    transition: all 0.3s ease;
-  }
-
-  .custom-file-upload:hover {
-    background: rgba(0, 255, 136, 0.3);
-    box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
-  }
-
-  input[type="file"] {
-    display: none;
-  }
-
-  .photo-preview-container {
-    width: 100%;
-    max-height: 280px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px dashed rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.25);
-    position: relative;
-  }
-
-  .photo-preview-container img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    display: block;
-  }
-
-  .no-photo-text {
-    font-size: 12px;
-    color: #94a3b8;
-    padding: 24px;
-    text-align: center;
-  }
-
   .history-control {
     display: flex;
     flex-direction: column;
@@ -442,20 +383,6 @@
     <label><input type="checkbox" class="task" data-id="13"> No Masturbation / Retention Streak</label>
   </div>
 
-  <!-- NEW SECTION: Daily Progress Photo -->
-  <div class="card">
-    <div class="title">DAILY PROGRESS PHOTO</div>
-    <div class="photo-upload-wrapper">
-      <label for="photo-input" class="custom-file-upload">
-        📷 Upload Today's Photo
-      </label>
-      <input type="file" id="photo-input" accept="image/*">
-      <div class="photo-preview-container" id="photo-container">
-        <span class="no-photo-text">No photo uploaded for today yet.</span>
-      </div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="title">DAILY SCORE</div>
     <div id="score">0%</div>
@@ -470,7 +397,7 @@
     <div class="title">CHECK PREVIOUS DAYS</div>
     <div class="history-control">
       <input type="date" id="history-date">
-      <div id="history-output">Select a date above to review past scores and photos.</div>
+      <div id="history-output">Select a date above to review past scores.</div>
     </div>
   </div>
 
@@ -480,36 +407,6 @@
 </div>
 
 <script>
-// IndexedDB setup to store full resolution daily photos securely
-let db;
-const request = indexedDB.open("HomecomingPhotosDB", 1);
-request.onupgradeneeded = (e) => {
-  db = e.target.result;
-  if (!db.objectStoreNames.contains("photos")) {
-    db.createObjectStore("photos", { keyPath: "date" });
-  }
-};
-request.onsuccess = (e) => {
-  db = e.target.result;
-  loadTodayPhoto();
-};
-
-function savePhoto(dateStr, base64Image) {
-  if (!db) return;
-  const tx = db.transaction("photos", "readwrite");
-  const store = tx.objectStore("photos");
-  store.put({ date: dateStr, image: base64Image });
-}
-
-function getPhoto(dateStr, callback) {
-  if (!db) return callback(null);
-  const tx = db.transaction("photos", "readonly");
-  const store = tx.objectStore("photos");
-  const req = store.get(dateStr);
-  req.onsuccess = () => callback(req.result ? req.result.image : null);
-  req.onerror = () => callback(null);
-}
-
 // Stage 1: Bicycle Vector
 const svgCycle = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <circle cx="16" cy="44" r="9" stroke="#88ccaa" stroke-width="2" fill="none"/>
@@ -633,22 +530,95 @@ function updateQuote() {
   document.getElementById("quote").textContent = quotes[new Date().getDate() % quotes.length];
 }
 
-// Photo Upload Logic
-const photoInput = document.getElementById("photo-input");
-const photoContainer = document.getElementById("photo-container");
+function initDailyDashboard() {
+  updateProgress();
+  updateWorkout();
+  updateQuote();
 
-photoInput.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const todayKey = "hc-" + currentTrackingDate;
+  const saved = JSON.parse(localStorage.getItem(todayKey) || "{}");
 
-  const reader = new FileReader();
-  reader.onload = function (event) {
-    const base64Img = event.target.result;
-    photoContainer.innerHTML = `<img src="${base64Img}" alt="Today's Progress Photo">`;
-    savePhoto(currentTrackingDate, base64Img);
-  };
-  reader.readAsDataURL(file);
+  document.querySelectorAll(".task").forEach(c => {
+    const taskId = c.getAttribute("data-id");
+    c.checked = !!saved[taskId];
+
+    c.onchange = () => {
+      let obj = JSON.parse(localStorage.getItem(todayKey) || "{}");
+      obj[taskId] = c.checked;
+      localStorage.setItem(todayKey, JSON.stringify(obj));
+      calcScore();
+    };
+  });
+  calcScore();
+}
+
+function calcScore() {
+  let all = [...document.querySelectorAll(".task")];
+  if (all.length === 0) return;
+
+  let done = all.filter(x => x.checked).length;
+  let pct = Math.round((done / all.length) * 100);
+  document.getElementById("score").textContent = pct + "% (" + done + "/" + all.length + ")";
+
+  // Option B Track Movement (0% to 85% width)
+  const rider = document.getElementById("rider");
+  let pos = Math.min((done / all.length) * 85, 85);
+  rider.style.left = pos + "%";
+
+  // Smooth Dynamic Background Color Transitions
+  const body = document.body;
+  body.classList.remove('theme-low', 'theme-mid', 'theme-high');
+
+  if (pct >= 80) {
+    body.classList.add('theme-high');
+  } else if (pct >= 40) {
+    body.classList.add('theme-mid');
+  } else if (pct > 0) {
+    body.classList.add('theme-low');
+  }
+
+  // Upgrade Vehicle Graphics based on Score
+  if (pct < 34) {
+    rider.innerHTML = svgCycle;
+  } else if (pct < 80) {
+    rider.innerHTML = svgScooter;
+  } else {
+    rider.innerHTML = svgMotorcycle;
+  }
+}
+
+// Past Day Inspector
+document.getElementById('history-date').addEventListener('change', (e) => {
+  const selectedDate = e.target.value;
+  if (!selectedDate) return;
+
+  const key = "hc-" + selectedDate;
+  const record = JSON.parse(localStorage.getItem(key));
+  const output = document.getElementById('history-output');
+
+  if (!record) {
+    output.textContent = `No recorded data found for ${selectedDate}.`;
+    return;
+  }
+
+  const allTasks = document.querySelectorAll(".task");
+  let completedCount = 0;
+  let details = [];
+
+  allTasks.forEach(task => {
+    const taskId = task.getAttribute("data-id");
+    const label = task.parentElement.textContent.trim();
+    if (record[taskId]) {
+      completedCount++;
+      details.push("✓ " + label);
+    }
+  });
+
+  const pct = Math.round((completedCount / allTasks.length) * 100);
+  output.innerHTML = `<strong>Score: ${pct}% (${completedCount}/${allTasks.length})</strong><br>` + details.join("<br>");
 });
 
-function loadTodayPhoto() {
-  getPhoto(currentTrackingDate, (imgData) =>
+initDailyDashboard();
+</script>
+</body>
+</html>
