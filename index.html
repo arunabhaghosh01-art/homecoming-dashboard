@@ -2,10 +2,53 @@
 <html>
 <head>
 <title>Homecoming Dashboard</title>
+<style>
+body{
+background:#000;
+color:#fff;
+font-family:Arial,sans-serif;
+text-align:center;
+padding-top:50px;
+}
+.card{
+background:#111;
+padding:20px;
+margin:20px;
+border-radius:15px;
+}
+h1{font-size:32px;}
+.countdown{font-size:28px;color:#00ff88;}
+</style>
 </head>
-<body style="background:black;color:white;font-family:Arial;text-align:center;padding-top:100px;">
+<body>
+
 <h1>🏠 Homecoming Dashboard</h1>
 <h2>Arunabha Ghosh</h2>
-<p>If you can see this page, everything is working.</p>
+
+<div class="card">
+<h3>Countdown to Homecoming</h3>
+<div id="countdown" class="countdown"></div>
+</div>
+
+<script>
+const targetDate = new Date("2026-10-09T00:00:00");
+
+function updateCountdown(){
+const now = new Date();
+const diff = targetDate - now;
+
+const days = Math.floor(diff/(1000*60*60*24));
+const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+const mins = Math.floor((diff%(1000*60*60))/(1000*60));
+const secs = Math.floor((diff%(1000*60))/1000);
+
+document.getElementById("countdown").innerHTML =
+days+" Days "+hours+" Hours "+mins+" Minutes "+secs+" Seconds";
+}
+
+setInterval(updateCountdown,1000);
+updateCountdown();
+</script>
+
 </body>
 </html>
