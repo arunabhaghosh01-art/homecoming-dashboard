@@ -87,7 +87,6 @@
   .card:nth-child(8) { animation-delay: 0.40s; }
   .card:nth-child(9) { animation-delay: 0.45s; }
   .card:nth-child(10) { animation-delay: 0.50s; }
-  .card:nth-child(11) { animation-delay: 0.55s; }
 
   @keyframes fadeInUp {
     to {
@@ -190,7 +189,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scaleX(-1);
+    transform: scaleX(-1); /* Flips vehicle SVG to face forward (Right) */
   }
 
   .rider svg {
@@ -344,39 +343,6 @@
     text-align: center;
   }
 
-  /* Photo Gallery Grid Layout */
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-top: 10px;
-  }
-
-  .gallery-item {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .gallery-item img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    display: block;
-  }
-
-  .gallery-date {
-    padding: 6px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #00ff88;
-    text-align: center;
-    background: rgba(15, 23, 42, 0.8);
-  }
-
   .history-control {
     display: flex;
     flex-direction: column;
@@ -476,7 +442,7 @@
     <label><input type="checkbox" class="task" data-id="13"> No Masturbation / Retention Streak</label>
   </div>
 
-  <!-- Daily Progress Photo Upload -->
+  <!-- NEW SECTION: Daily Progress Photo -->
   <div class="card">
     <div class="title">DAILY PROGRESS PHOTO</div>
     <div class="photo-upload-wrapper">
@@ -487,14 +453,6 @@
       <div class="photo-preview-container" id="photo-container">
         <span class="no-photo-text">No photo uploaded for today yet.</span>
       </div>
-    </div>
-  </div>
-
-  <!-- All Progress Photos Gallery -->
-  <div class="card">
-    <div class="title">PROGRESS GALLERY</div>
-    <div id="gallery-container" class="gallery-grid">
-      <span class="no-photo-text" style="grid-column: span 2;">Loading saved progress photos...</span>
     </div>
   </div>
 
@@ -534,7 +492,6 @@ request.onupgradeneeded = (e) => {
 request.onsuccess = (e) => {
   db = e.target.result;
   loadTodayPhoto();
-  loadAllPhotosGallery();
 };
 
 function savePhoto(dateStr, base64Image) {
@@ -542,9 +499,6 @@ function savePhoto(dateStr, base64Image) {
   const tx = db.transaction("photos", "readwrite");
   const store = tx.objectStore("photos");
   store.put({ date: dateStr, image: base64Image });
-  tx.oncomplete = () => {
-    loadAllPhotosGallery();
-  };
 }
 
 function getPhoto(dateStr, callback) {
@@ -554,38 +508,6 @@ function getPhoto(dateStr, callback) {
   const req = store.get(dateStr);
   req.onsuccess = () => callback(req.result ? req.result.image : null);
   req.onerror = () => callback(null);
-}
-
-function getAllPhotos(callback) {
-  if (!db) return callback([]);
-  const tx = db.transaction("photos", "readonly");
-  const store = tx.objectStore("photos");
-  const req = store.getAll();
-  req.onsuccess = () => callback(req.result || []);
-  req.onerror = () => callback([]);
-}
-
-function loadAllPhotosGallery() {
-  const container = document.getElementById("gallery-container");
-  getAllPhotos((records) => {
-    if (records.length === 0) {
-      container.innerHTML = `<span class="no-photo-text" style="grid-column: span 2;">No progress photos saved yet. Upload one above to start building your gallery!</span>`;
-      return;
-    }
-    
-    records.sort((a, b) => b.date.localeCompare(a.date));
-    
-    let html = "";
-    records.forEach(item => {
-      html += `
-        <div class="gallery-item">
-          <img src="${item.image}" alt="Progress Photo ${item.date}">
-          <div class="gallery-date">${item.date}</div>
-        </div>
-      `;
-    });
-    container.innerHTML = html;
-  });
 }
 
 // Stage 1: Bicycle Vector
@@ -679,4 +601,54 @@ tick();
 
 function updateProgress() {
   let day = Math.max(0, Math.floor((new Date() - start) / 86400000));
-  document.getElementById('daytxt').t
+  document.getElementById('daytxt').textContent = `Day ${day} / 61`;
+  setTimeout(() => {
+    document.getElementById('fill').style.width = Math.min((day / 61) * 100, 100) + '%';
+  }, 300);
+}
+
+function updateWorkout() {
+  const workouts = [
+    ["45 Min Walk", "Stretching"],
+    ["Push-ups", "Incline Push-ups", "Diamond Push-ups", "Plank"],
+    ["Squats", "Lunges", "Calf Raises", "Wall Sit"],
+    ["Jogging", "Mountain Climbers", "Jumping Jacks"],
+    ["Pike Push-ups", "Plank", "Side Plank", "Leg Raises"],
+    ["Push-ups", "Squats", "Lunges", "Burpees", "Plank"],
+    ["Walk/Jog", "Bicycle Crunches", "Leg Raises", "Mountain Climbers"]
+  ];
+  document.getElementById('workout').innerHTML = "<ul>" + workouts[new Date().getDay()].map(x => "<li>" + x + "</li>").join("") + "</ul>";
+}
+
+function updateQuote() {
+  const quotes = [
+    "“The pain of discipline is nothing compared to the pain of regret.”",
+    "“Every impulse you overcome builds the warrior inside you.”",
+    "“Control your mind, or your mind will control you.”",
+    "“Small daily wins stacked consistently create an unstoppable man.”",
+    "“Focus on who you want to become when you walk through that door.”",
+    "“Silence the noise, master yourself, and let your results speak.”",
+    "“61 days to transform your physique, mindset, and presence.”"
+  ];
+  document.getElementById("quote").textContent = quotes[new Date().getDate() % quotes.length];
+}
+
+// Photo Upload Logic
+const photoInput = document.getElementById("photo-input");
+const photoContainer = document.getElementById("photo-container");
+
+photoInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    const base64Img = event.target.result;
+    photoContainer.innerHTML = `<img src="${base64Img}" alt="Today's Progress Photo">`;
+    savePhoto(currentTrackingDate, base64Img);
+  };
+  reader.readAsDataURL(file);
+});
+
+function loadTodayPhoto() {
+  getPhoto(currentTrackingDate, (imgData) =>
