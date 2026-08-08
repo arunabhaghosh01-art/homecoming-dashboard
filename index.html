@@ -47,7 +47,6 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
-  /* Enhanced Touch & Hover Glow Effects */
   .card:hover, .card:active {
     border: 2px solid #00ff88;
     box-shadow: 0 20px 45px rgba(0, 255, 136, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -148,10 +147,10 @@
     box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
   }
 
-  /* Track with Rider Facing RIGHT */
+  /* Interactive Journey Track */
   .journey-track {
     position: relative;
-    height: 48px;
+    height: 52px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
@@ -164,12 +163,20 @@
   .rider {
     position: absolute;
     left: 0%;
-    font-size: 28px;
+    width: 44px;
+    height: 44px;
     transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     filter: drop-shadow(0 0 8px rgba(0, 255, 136, 0.6));
-    display: inline-block;
-    /* Flipped horizontally to face RIGHT */
-    transform: scaleX(-1); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Facing RIGHT */
+    transform: scaleX(-1);
+  }
+
+  .rider svg {
+    width: 100%;
+    height: 100%;
   }
 
   label {
@@ -320,9 +327,9 @@
     <div id="daytxt" style="font-weight: 700; font-size: 16px;"></div>
     <div class="progress"><div class="fill" id="fill"></div></div>
     
-    <!-- Animated Track Facing Right -->
+    <!-- Animated Track with Boy Riding All 3 Vehicles -->
     <div class="journey-track">
-      <div class="rider" id="rider">🚴</div>
+      <div class="rider" id="rider"></div>
     </div>
   </div>
 
@@ -383,6 +390,49 @@
 </div>
 
 <script>
+// SVG Vector Graphics ensuring rider is riding on Cycle, Scooter, and Motorcycle
+const svgCycle = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Wheels -->
+  <circle cx="16" cy="46" r="10" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <circle cx="48" cy="46" r="10" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <!-- Bicycle Frame -->
+  <path d="M16 46L28 46L36 32L18 32Z" stroke="#cbd5e1" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M28 46L34 22L48 46" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 22L40 22" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Rider/Boy -->
+  <circle cx="20" cy="14" r="5" fill="#fbcfe8"/> <!-- Head -->
+  <path d="M20 19C20 19 22 28 26 31" stroke="#00b8ff" stroke-width="3.5" stroke-linecap="round"/> <!-- Body -->
+  <path d="M22 23L36 23" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm to Handle -->
+  <path d="M26 31L18 32L24 44" stroke="#fbcfe8" stroke-width="2.5" stroke-linecap="round"/> <!-- Leg to Pedal -->
+</svg>`;
+
+const svgScooter = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Scooter Body & Wheels -->
+  <circle cx="16" cy="48" r="7" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <circle cx="48" cy="48" r="7" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <path d="M16 48H36L42 36L46 22H38" stroke="#ffb703" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M20 40H32V46H20Z" fill="#ffb703"/>
+  <!-- Rider/Boy on Scooter -->
+  <circle cx="22" cy="12" r="5" fill="#fbcfe8"/> <!-- Head -->
+  <path d="M22 17L24 32" stroke="#00b8ff" stroke-width="4" stroke-linecap="round"/> <!-- Body -->
+  <path d="M23 21L42 24" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm -->
+  <path d="M24 32L28 42L34 42" stroke="#fbcfe8" stroke-width="3" stroke-linecap="round"/> <!-- Legs on Floorboard -->
+</svg>`;
+
+const svgMotorcycle = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bike Body & Wheels -->
+  <circle cx="14" cy="46" r="9" stroke="#00ff88" stroke-width="3.5" fill="none"/>
+  <circle cx="50" cy="46" r="9" stroke="#00ff88" stroke-width="3.5" fill="none"/>
+  <path d="M14 46L26 34H38L50 46" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 34L30 24H44L40 34Z" fill="#ef4444"/>
+  <path d="M42 24L46 18H50" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Rider/Boy Leaning Forward on Heavy Motorcycle -->
+  <circle cx="24" cy="12" r="5" fill="#fbcfe8"/> <!-- Head -->
+  <path d="M24 17L32 26" stroke="#00b8ff" stroke-width="4" stroke-linecap="round"/> <!-- Body -->
+  <path d="M27 20L46 20" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm -->
+  <path d="M32 26L28 36L34 38" stroke="#fbcfe8" stroke-width="3" stroke-linecap="round"/> <!-- Leg -->
+</svg>`;
+
 const target = new Date("2026-10-09T00:00:00");
 const start = new Date("2026-08-08T00:00:00");
 
@@ -478,18 +528,17 @@ function calcScore() {
   let pct = Math.round((done / all.length) * 100);
   document.getElementById("score").textContent = pct + "% (" + done + "/" + all.length + ")";
 
-  // Calculate position along track
   const rider = document.getElementById("rider");
   let pos = Math.min((done / all.length) * 85, 85);
   rider.style.left = pos + "%";
 
-  // Evolution Progression (Cycle -> Scooter -> Motorcycle)
+  // Boy rider shown explicitly on Bicycle, Scooter, and Motorcycle
   if (pct < 34) {
-    rider.textContent = "🚴";  // Boy/Rider on Cycle from 0%
+    rider.innerHTML = svgCycle;
   } else if (pct < 80) {
-    rider.textContent = "🛵";  // Scooter in middle stage
+    rider.innerHTML = svgScooter;
   } else {
-    rider.textContent = "🏍️";  // Heavy Motorcycle at end
+    rider.innerHTML = svgMotorcycle;
   }
 }
 
