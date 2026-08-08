@@ -1,54 +1,236 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homecoming Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-body{
-background:#000;
-color:#fff;
-font-family:Arial,sans-serif;
-text-align:center;
-padding-top:50px;
-}
-.card{
-background:#111;
-padding:20px;
-margin:20px;
-border-radius:15px;
-}
-h1{font-size:32px;}
-.countdown{font-size:28px;color:#00ff88;}
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    background-color: #0b0f17;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(0, 255, 136, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(0, 153, 255, 0.08) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: #f8fafc;
+    min-height: 100vh;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header p {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .card {
+    background: rgba(18, 24, 38, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .time-block {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 12px 6px;
+    text-align: center;
+  }
+
+  .time-number {
+    font-size: 24px;
+    font-weight: 800;
+    color: #00ff88;
+    text-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+    line-height: 1.1;
+  }
+
+  .time-label {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .small-card {
+    background: rgba(18, 24, 38, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 18px 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .small-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .small-card h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  .small-card p {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .footer {
+    margin-top: 32px;
+    text-align: center;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+  }
 </style>
 </head>
+
 <body>
 
-<h1>🏠 Homecoming Dashboard</h1>
-<h2>Arunabha Ghosh</h2>
+<div class="container">
+  <div class="header">
+    <h1>🏠 Homecoming Dashboard</h1>
+    <p>Arunabha Ghosh</p>
+  </div>
 
-<div class="card">
-<h3>Countdown to Homecoming</h3>
-<div id="countdown" class="countdown"></div>
+  <div class="card">
+    <h2>⏳ Countdown to Homecoming</h2>
+    <div class="countdown-grid" id="countdown">
+      <div class="time-block"><div class="time-number">--</div><div class="time-label">Days</div></div>
+      <div class="time-block"><div class="time-number">--</div><div class="time-label">Hours</div></div>
+      <div class="time-block"><div class="time-number">--</div><div class="time-label">Mins</div></div>
+      <div class="time-block"><div class="time-number">--</div><div class="time-label">Secs</div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="small-card">
+      <h3>Target Date</h3>
+      <p>09 Oct 2026</p>
+    </div>
+
+    <div class="small-card">
+      <h3>Status</h3>
+      <p>🎯 Active</p>
+    </div>
+
+    <div class="small-card">
+      <h3>Destination</h3>
+      <p>Home</p>
+    </div>
+
+    <div class="small-card">
+      <h3>Mode</h3>
+      <p>🚆 Train</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Designed by Arunabha Ghosh
+  </div>
 </div>
 
 <script>
-const targetDate = new Date("2026-10-09T00:00:00");
+  const targetDate = new Date("2026-10-09T00:00:00").getTime();
 
-function updateCountdown(){
-const now = new Date();
-const diff = targetDate - now;
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
 
-const days = Math.floor(diff/(1000*60*60*24));
-const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-const mins = Math.floor((diff%(1000*60*60))/(1000*60));
-const secs = Math.floor((diff%(1000*60))/1000);
+    if (distance < 0) {
+      document.getElementById("countdown").innerHTML = `
+        <div style="grid-column: span 4; font-size: 20px; font-weight: 800; color: #00ff88; text-align: center; padding: 12px 0;">
+          🎉 Welcome Home!
+        </div>`;
+      return;
+    }
 
-document.getElementById("countdown").innerHTML =
-days+" Days "+hours+" Hours "+mins+" Minutes "+secs+" Seconds";
-}
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-setInterval(updateCountdown,1000);
-updateCountdown();
+    document.getElementById("countdown").innerHTML = `
+      <div class="time-block"><div class="time-number">${days}</div><div class="time-label">Days</div></div>
+      <div class="time-block"><div class="time-number">${hours}</div><div class="time-label">Hours</div></div>
+      <div class="time-block"><div class="time-number">${minutes}</div><div class="time-label">Mins</div></div>
+      <div class="time-block"><div class="time-number">${seconds}</div><div class="time-label">Secs</div></div>
+    `;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 </script>
 
 </body>
 </html>
+
