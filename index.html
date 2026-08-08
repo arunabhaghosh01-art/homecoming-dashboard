@@ -170,8 +170,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Facing RIGHT */
-    transform: scaleX(-1);
+    /* Facing LEFT (Opposite direction) */
+    transform: scaleX(1);
   }
 
   .rider svg {
@@ -327,7 +327,7 @@
     <div id="daytxt" style="font-weight: 700; font-size: 16px;"></div>
     <div class="progress"><div class="fill" id="fill"></div></div>
     
-    <!-- Animated Track with Boy Riding All 3 Vehicles -->
+    <!-- Animated Track with Boy Riding Facing Left -->
     <div class="journey-track">
       <div class="rider" id="rider"></div>
     </div>
@@ -390,47 +390,53 @@
 </div>
 
 <script>
-// SVG Vector Graphics ensuring rider is riding on Cycle, Scooter, and Motorcycle
+// SVG Vector Graphics facing LEFT (opposite direction) matching reference stick-figure design
+
+// Cycle: Facing Left
 const svgCycle = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Wheels -->
-  <circle cx="16" cy="46" r="10" stroke="#00ff88" stroke-width="3" fill="none"/>
-  <circle cx="48" cy="46" r="10" stroke="#00ff88" stroke-width="3" fill="none"/>
-  <!-- Bicycle Frame -->
-  <path d="M16 46L28 46L36 32L18 32Z" stroke="#cbd5e1" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M28 46L34 22L48 46" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M34 22L40 22" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
-  <!-- Rider/Boy -->
-  <circle cx="20" cy="14" r="5" fill="#fbcfe8"/> <!-- Head -->
-  <path d="M20 19C20 19 22 28 26 31" stroke="#00b8ff" stroke-width="3.5" stroke-linecap="round"/> <!-- Body -->
-  <path d="M22 23L36 23" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm to Handle -->
-  <path d="M26 31L18 32L24 44" stroke="#fbcfe8" stroke-width="2.5" stroke-linecap="round"/> <!-- Leg to Pedal -->
+  <circle cx="16" cy="46" r="9" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <circle cx="48" cy="46" r="9" stroke="#00ff88" stroke-width="3" fill="none"/>
+  <!-- Bike Frame -->
+  <path d="M16 46L24 28H18" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+  <path d="M48 46L36 34L24 46H48Z" stroke="#00ff88" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M36 34L32 26" stroke="#00ff88" stroke-width="2.5"/>
+  <!-- Rider (Yellow Helmet/Pink Head, Blue Shirt) -->
+  <circle cx="30" cy="14" r="5" fill="#facc15"/>
+  <path d="M30 19L26 31" stroke="#00b8ff" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M28 22L18 28" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M26 31L20 40L28 46" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/>
 </svg>`;
 
+// Scooter: Facing Left matching stick-figure photo reference
 const svgScooter = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Scooter Body & Wheels -->
+  <!-- Scooter Wheels -->
   <circle cx="16" cy="48" r="7" stroke="#00ff88" stroke-width="3" fill="none"/>
   <circle cx="48" cy="48" r="7" stroke="#00ff88" stroke-width="3" fill="none"/>
-  <path d="M16 48H36L42 36L46 22H38" stroke="#ffb703" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M20 40H32V46H20Z" fill="#ffb703"/>
-  <!-- Rider/Boy on Scooter -->
-  <circle cx="22" cy="12" r="5" fill="#fbcfe8"/> <!-- Head -->
-  <path d="M22 17L24 32" stroke="#00b8ff" stroke-width="4" stroke-linecap="round"/> <!-- Body -->
-  <path d="M23 21L42 24" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm -->
-  <path d="M24 32L28 42L34 42" stroke="#fbcfe8" stroke-width="3" stroke-linecap="round"/> <!-- Legs on Floorboard -->
+  <!-- Scooter Frame -->
+  <path d="M48 48H28L22 32L18 20H24" stroke="#00ff88" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 42H44" stroke="#00ff88" stroke-width="3"/>
+  <!-- Rider Stick-Figure (Pink head/helmet, blue body, orange legs) -->
+  <circle cx="36" cy="14" r="5" fill="#f472b6"/>
+  <path d="M36 19L36 34" stroke="#00b8ff" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M36 24L20 22" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M36 34L32 44H26" stroke="#f97316" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+// Motorcycle: Facing Left with forward crouched stick figure rider
 const svgMotorcycle = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Bike Body & Wheels -->
+  <!-- Bike Wheels -->
   <circle cx="14" cy="46" r="9" stroke="#00ff88" stroke-width="3.5" fill="none"/>
   <circle cx="50" cy="46" r="9" stroke="#00ff88" stroke-width="3.5" fill="none"/>
-  <path d="M14 46L26 34H38L50 46" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
-  <path d="M24 34L30 24H44L40 34Z" fill="#ef4444"/>
-  <path d="M42 24L46 18H50" stroke="#cbd5e1" stroke-width="2.5" stroke-linecap="round"/>
-  <!-- Rider/Boy Leaning Forward on Heavy Motorcycle -->
-  <circle cx="24" cy="12" r="5" fill="#fbcfe8"/> <!-- Head -->
-  <path d="M24 17L32 26" stroke="#00b8ff" stroke-width="4" stroke-linecap="round"/> <!-- Body -->
-  <path d="M27 20L46 20" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/> <!-- Arm -->
-  <path d="M32 26L28 36L34 38" stroke="#fbcfe8" stroke-width="3" stroke-linecap="round"/> <!-- Leg -->
+  <!-- Bike Body -->
+  <path d="M50 46L38 34H26L14 46" stroke="#00ff88" stroke-width="3" stroke-linecap="round"/>
+  <path d="M40 34L34 24H20L24 34Z" fill="#00ff88"/>
+  <path d="M22 24L18 18H14" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Rider Crouched Facing Left -->
+  <circle cx="34" cy="12" r="5" fill="#facc15"/>
+  <path d="M34 17L26 26" stroke="#00b8ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M31 20L16 20" stroke="#00b8ff" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M26 26L30 36L24 38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
 </svg>`;
 
 const target = new Date("2026-10-09T00:00:00");
@@ -532,7 +538,7 @@ function calcScore() {
   let pos = Math.min((done / all.length) * 85, 85);
   rider.style.left = pos + "%";
 
-  // Boy rider shown explicitly on Bicycle, Scooter, and Motorcycle
+  // Stick-figure riding Cycle, Scooter, or Motorcycle
   if (pct < 34) {
     rider.innerHTML = svgCycle;
   } else if (pct < 80) {
